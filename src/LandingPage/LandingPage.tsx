@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { ArrowRight, Briefcase, DollarSign, Gift, Search, Shield, Users } from 'lucide-react'
@@ -10,9 +10,15 @@ export default function LandingPage() {
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">PerkPass</h1>
-          <div className="space-x-4">
-            <Button variant="ghost">About</Button>
-            <Button variant="ghost">Contact</Button>
+          <div className="space-x-4 flex">
+            <Button variant="outline" className="flex items-center">
+              <Briefcase className="mr-2 h-4 w-4" />
+              Register Coupons
+            </Button>
+            <Button variant="default" className="flex items-center">
+              <Search className="mr-2 h-4 w-4" />
+              Buy Coupons
+            </Button>
           </div>
         </div>
       </nav>
@@ -23,41 +29,12 @@ export default function LandingPage() {
         <p className="text-xl md:text-2xl mb-8 text-gray-600">
           List your unused corporate perks or explore amazing deals
         </p>
-      </header>
-
-      {/* Login Options */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Briefcase className="mr-2" />
-                For Employees
-              </CardTitle>
-              <CardDescription>List your unused corporate discount coupons</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" size="lg">
-                Employee Login / Sign Up
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Search className="mr-2" />
-                For Coupon Explorers
-              </CardTitle>
-              <CardDescription>Discover and purchase exclusive corporate discounts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" size="lg">
-                Explorer Login / Sign Up
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <Button size="lg" className="text-lg px-8 py-6">
+            Learn More <ArrowRight className="ml-2" />
+          </Button>
         </div>
-      </section>
+      </header>
 
       {/* Feature Highlights */}
       <section className="bg-white py-16">
@@ -158,10 +135,10 @@ export default function LandingPage() {
           <p className="text-xl mb-8">Join PerkPass today and start listing or exploring exclusive discounts!</p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-              List Your Coupons <ArrowRight className="ml-2" />
+              Register Coupons <ArrowRight className="ml-2" />
             </Button>
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-              Explore Coupons <ArrowRight className="ml-2" />
+              Buy Coupons <ArrowRight className="ml-2" />
             </Button>
           </div>
         </div>

@@ -1,5 +1,5 @@
 // components/FeatureSection.js
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Gift, DollarSign, Shield, Users } from "lucide-react"
 
 const features = [

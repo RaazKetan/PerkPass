@@ -1,6 +1,8 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
-import { Badge } from "../components/ui/badge"
-import { Button } from "../components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
+import { Badge } from "../../components/ui/badge"
+import { Button } from "../../components/ui/button"
+import { useCart } from "../../context/CartContext"
+
 
 
 interface Coupon {
@@ -24,6 +26,7 @@ interface Coupon {
   ]  
 
 export default function CouponsCard() {
+  const { addToCart } = useCart()
     return(
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
         {coupons.map((coupon) => (
@@ -42,7 +45,14 @@ export default function CouponsCard() {
               <p className="text-sm text-gray-600 mt-2">Expires: {coupon.expiryDate}</p>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Add to Cart</Button>
+              <Button 
+              onClick={() => addToCart({
+                id: coupon.id,
+                company: coupon.company,
+                description: coupon.description,
+                price: coupon.discountedPrice
+              })}
+              className="w-full">Add to Cart</Button>
             </CardFooter>
           </Card>
         ))}

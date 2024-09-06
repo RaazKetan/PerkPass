@@ -1,5 +1,5 @@
 // components/TestimonialsSection.js
-import { Card, CardContent } from "../components/ui/card"
+import { Card, CardContent } from "../../components/ui/card"
 
 const testimonials = [
   { name: "Sarah L.", role: "Employee", quote: "I've made over $500 selling my unused perks on PerkPass!" },

@@ -1,10 +1,10 @@
 
-import HeroSection from "../components/shared/Hero"
+import HeroSection from "../LandingPage/Hero"
 import Navbar from "../components/shared/Navbar"
-import FeatureSection from "../components/shared/FeatureSection"
-import Testimonials from "../components/shared/Testimonials"
-import HowItWorksSection from "../components/shared/HowItWorks"
-import Perks from "../components/shared/Perks"
+import FeatureSection from "../LandingPage/FeatureSection"
+import Testimonials from "../LandingPage/Testimonials"
+import HowItWorksSection from "./HowItWorks"
+import Perks from "../LandingPage/Perks"
 import Footer from "../components/shared/Footer"
 
 export default function LandingPage() {

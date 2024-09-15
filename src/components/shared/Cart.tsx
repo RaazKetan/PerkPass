@@ -1,6 +1,10 @@
 // src/components/Cart.tsx
+import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+// import { useCart } from "../../context/CartContext";
 
 interface CartProps {
   isOpen: boolean;
@@ -9,6 +13,16 @@ interface CartProps {
 
 export default function Cart({ isOpen, onClose }: CartProps) {
   const { cartItems, removeFromCart } = useCart();
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
+
+  const handleCheckout = () => {
+    if (isSignedIn && cartItems.length > 0) {
+      navigate("/checkout");
+    } else {
+      navigate("/login");  // Redirect to login if not signed in or empty cart
+    }
+  };
 
   return (
     <div
@@ -56,7 +70,11 @@ export default function Cart({ isOpen, onClose }: CartProps) {
       </div>
       {cartItems.length > 0 && (
         <div className="p-4 border-t">
-          <Button className="w-full">Checkout</Button>
+          <Link to={"/checkout"}>
+          <Button 
+          onClick={handleCheckout} disabled={cartItems.length === 0}
+          className="w-full">Checkout</Button>
+          </Link>
         </div>
       )}
     </div>

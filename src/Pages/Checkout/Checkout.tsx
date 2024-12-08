@@ -3,11 +3,15 @@
 import React, { useState } from 'react'
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Separator } from "../../components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import { ArrowLeft, CreditCard, Lock, ShoppingCart } from 'lucide-react'
+import { Lock, Banknote, CreditCardIcon } from 'lucide-react'
+import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group"
+import { Alert, AlertDescription } from "../../components/ui/alert"
+import Footer from '../../components/shared/Footer'
+import Navbar from '../../components/shared/Navbar'
+import { SignedIn } from '@clerk/clerk-react'
+import { SignedOut } from '@clerk/clerk-react'
 
 interface CartItem {
   id: number
@@ -16,78 +20,161 @@ interface CartItem {
   price: number
 }
 
+interface OrderDetails {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  zipCode: string
+}
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  placeholder: string;
+  required: boolean;
+}
+
+
 export default function Checkout() {
   const [cartItems] = useState<CartItem[]>([
     { id: 1, company: "TechCorp", description: "50% off annual subscription", price: 30 },
     { id: 2, company: "FitnessPro", description: "Buy one month, get one free", price: 24 },
   ])
 
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card')
+  const [loading, setLoading] = useState(false)
+  const [orderSuccess, setOrderSuccess] = useState(false)
+
+  const Input = React.forwardRef<HTMLInputElement, InputProps>(({ id, ...rest }, ref) => (
+    <input id={id} ref={ref} {...rest} />
+  ));
+  Input.displayName = 'Input';
+
   const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0)
-  const tax = subtotal * 0.1 // Assuming 10% tax
+  const tax = subtotal * 0.1
   const total = subtotal + tax
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // Here you would typically handle the form submission,
-    // such as sending the data to your backend
-    alert('Order placed successfully!')
+    setLoading(true)
+
+    const formData = new FormData(event.currentTarget)
+    const orderDetails: OrderDetails = {
+      firstName: formData.get('firstName') as string,
+      lastName: formData.get('lastName') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      address: formData.get('address') as string,
+      city: formData.get('city') as string,
+      zipCode: formData.get('zipCode') as string,
+    }
+
+    if (paymentMethod === 'cod') {
+      try {
+        const response = await fetch('/api/place-cod-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderDetails,
+            items: cartItems,
+            total,
+          }),
+        })
+
+        if (response.ok) {
+          setOrderSuccess(true)
+        } else {
+          throw new Error('Failed to place order')
+        }
+      } catch (error) {
+        console.error('Error placing order:', error)
+        alert('There was an error placing your order. Please try again.')
+      }
+    } else {
+      // Handle card payment logic here
+      alert('Card payment processing would go here')
+    }
+
+    setLoading(false)
+  }
+
+  if (orderSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center text-green-600">Order Placed Successfully!</CardTitle>
+            <CardDescription className="text-center">
+              We've sent the order details to your email and phone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                Please keep cash ready for delivery. Our delivery partner will contact you soon.
+              </AlertDescription>
+            </Alert>
+            <Button
+              className="w-full"
+              onClick={() => window.location.href = '/'}
+            >
+              Return to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="max-h-screen bg-gradient-to-b from-blue-100 to-white">
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Button variant="ghost" className="flex items-center">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Cart
-          </Button>
-          <h1 className="text-2xl font-bold text-blue-600">PerkPass Checkout</h1>
-          <Button variant="ghost" className="flex items-center">
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            <span className="sr-only">Shopping cart</span>
-            <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-              {cartItems.length}
-            </span>
-          </Button>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
+      <Navbar/>
+      <SignedIn>
       <main className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Billing Information</CardTitle>
-                  <CardDescription>Please enter your billing details</CardDescription>
+                  <CardTitle>Contact Information</CardTitle>
+                  <CardDescription>Please enter your details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" placeholder="John" required />
+                      <Input className="firstName"
+                       id="firstName" 
+                       placeholder="John" 
+                       required />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" placeholder="Doe" required />
+                      <Input className="lastName" placeholder='Doe' required />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="john.doe@example.com" required />
+                    <Input className="email" placeholder='johndoe@gmail.com' type="email" required />
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
-                    <Input id="address" placeholder="123 Main St" required />
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input className="phone" placeholder='1234567890' type="tel" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Delivery Address</Label>
+                    <Input className="address" placeholder='abc 5th street' required />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="city">City</Label>
-                      <Input id="city" placeholder="New York" required />
+                      <Input className="city" placeholder='New York' required />
                     </div>
                     <div>
                       <Label htmlFor="zipCode">ZIP Code</Label>
-                      <Input id="zipCode" placeholder="10001" required />
+                      <Input className="zipCode" placeholder='0082301' required />
                     </div>
                   </div>
                 </CardContent>
@@ -95,44 +182,52 @@ export default function Checkout() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    Payment Details
-                  </CardTitle>
-                  <CardDescription>Enter your payment information</CardDescription>
+                  <CardTitle>Payment Method</CardTitle>
+                  <CardDescription>Choose how you want to pay</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input id="cardNumber" placeholder="1234 5678 9012 3456" required />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                      <Input id="expiryDate" placeholder="MM/YY" required />
+                  <RadioGroup
+                    defaultValue="card"
+                    onValueChange={(value) => setPaymentMethod(value as 'card' | 'cod')}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="card" id="card" />
+                      <Label htmlFor="card" className="flex items-center">
+                        <CreditCardIcon className="mr-2 h-4 w-4" />
+                        Credit/Debit Card
+                      </Label>
                     </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input id="cvv" placeholder="123" required />
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="cod" id="cod" />
+                      <Label htmlFor="cod" className="flex items-center">
+                        <Banknote className="mr-2 h-4 w-4" />
+                        Cash on Delivery
+                      </Label>
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="cardholderName">Cardholder Name</Label>
-                    <Input id="cardholderName" placeholder="John Doe" required />
-                  </div>
-                  <div>
-                    <Label htmlFor="cardType">Card Type</Label>
-                    <Select required>
-                      <SelectTrigger id="cardType">
-                        <SelectValue placeholder="Select card type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="visa">Visa</SelectItem>
-                        <SelectItem value="mastercard">Mastercard</SelectItem>
-                        <SelectItem value="amex">American Express</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  </RadioGroup>
+
+                  {paymentMethod === 'card' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="cardNumber">Card Number</Label>
+                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="expiryDate">Expiry Date</Label>
+                          <Input id="expiryDate" placeholder="MM/YY" />
+                        </div>
+                        <div>
+                          <Label htmlFor="cvv">CVV</Label>
+                          <Input id="cvv" placeholder="123" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="cardholderName">Cardholder Name</Label>
+                        <Input id="cardholderName" placeholder="John Doe" />
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -170,23 +265,32 @@ export default function Checkout() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full">Place Order</Button>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading}
+                  >
+                    {loading ? 'Processing...' : `Place Order (${paymentMethod === 'cod' ? 'Cash on Delivery' : 'Pay Now'})`}
+                  </Button>
                 </CardFooter>
               </Card>
               <div className="mt-4 text-center text-sm text-gray-500 flex items-center justify-center">
                 <Lock className="mr-2 h-4 w-4" />
-                Your payment information is secure
+                Your information is secure
               </div>
             </div>
           </div>
         </form>
       </main>
+      </SignedIn>
 
-      <footer className="bg-gray-800 text-white py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2023 PerkPass. All rights reserved.</p>
+      <SignedOut>
+        <div className="text-center py-16">
+          <h2>Please sign in to view and buy coupons.</h2>
         </div>
-      </footer>
+      </SignedOut>
+
+      <Footer />
     </div>
   )
 }
